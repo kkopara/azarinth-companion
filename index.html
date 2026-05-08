@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Azarinth — Series Companion</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #060504;
+  --panel: #0c0a08;
+  --panel2: #100d0a;
+  --border: #1e1810;
+  --border2: #2a2018;
+  --gold: #c9a84c;
+  --gold-dim: #5a4820;
+  --gold-bright: #ead080;
+  --gold-glow: rgba(201,168,76,0.15);
+  --ash: #a09080;
+  --text: #c0b098;
+  --text-dim: #6a6050;
+  --azure: #5ab4d4;
+  --azure-dim: #1a3a4a;
+  --ember: #d4663a;
+  --ember-dim: #3a1a08;
+  --green: #68b870;
+  --green-dim: #183820;
+  --purple: #9060c8;
+  --purple-dim: #2a1840;
+
+  /* book accent colors */
+  --b1: #c9a84c;
+  --b2: #5ab4d4;
+  --b3: #d4663a;
+  --b4: #9060c8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Crimson Pro',serif;
+  font-size:15px;
+  display:flex;
+  flex-direction:column;
+  height:100%;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border2);}
+
+/* ── TOP BAR ── */
+.topbar{
+  background:var(--panel);
+  border-bottom:1px solid var(--border2);
+  padding:8px 14px 0;
+  flex-shrink:0;
+  position:relative;
+}
+.topbar::after{
+  content:'';
+  position:absolute;
+  bottom:-1px;left:50%;transform:translateX(-50%);
+  width:160px;height:1px;
+  background:var(--book-color,var(--gold));
+  box-shadow:0 0 14px var(--book-color,var(--gold));
+  transition:background 0.4s,box-shadow 0.4s;
+}
+.title-row{
+  display:flex;align-items:baseline;gap:10px;
+  margin-bottom:8px;
+}
+.app-title{
+  font-family:'Cinzel',serif;
+  font-size:14px;
+  color:var(--gold);
+  letter-spacing:0.12em;
+}
+.app-sub{font-size:11px;color:var(--gold-dim);font-style:italic;}
+
+/* book switcher */
+.book-switcher{
+  display:flex;gap:5px;margin-bottom:8px;
+}
+.bk-btn{
+  flex:1;
+  padding:5px 4px;
+  font-family:'Cinzel',serif;
+  font-size:8px;
+  letter-spacing:0.12em;
+  text-align:center;
+  border:1px solid var(--border2);
+  color:var(--text-dim);
+  cursor:pointer;
+  transition:all 0.2s;
+  background:transparent;
+  position:relative;
+  overflow:hidden;
+}
+.bk-btn::before{
+  content:'';
+  position:absolute;
+  bottom:0;left:0;right:0;
+  height:2px;
+  opacity:0;
+  transition:opacity 0.2s;
+}
+.bk-btn.b1::before{background:var(--b1);}
+.bk-btn.b2::before{background:var(--b2);}
+.bk-btn.b3::before{background:var(--b3);}
+.bk-btn.b4::before{background:var(--b4);}
+.bk-btn.active{color:var(--gold-bright);border-color:var(--gold-dim);}
+.bk-btn.active::before{opacity:1;}
+.bk-btn .bk-label{display:block;font-size:7px;color:var(--text-dim);margin-top:1px;}
+
+/* chapter control */
+.ch-row{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:6px;
+}
+.ch-lbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.15em;color:var(--text-dim);white-space:nowrap;}
+.ch-num{font-family:'Cinzel',serif;font-size:20px;color:var(--book-color,var(--gold));min-width:36px;text-align:right;transition:color 0.3s;}
+input[type=range]{
+  flex:1;-webkit-appearance:none;
+  height:2px;
+  background:var(--border2);
+  outline:none;cursor:pointer;
+  position:relative;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:13px;height:13px;border-radius:50%;
+  background:var(--book-color,var(--gold));
+  box-shadow:0 0 8px var(--book-color,var(--gold));
+  border:2px solid var(--bg);
+  transition:background 0.3s,box-shadow 0.3s;
+}
+.ch-name-bar{
+  font-size:11px;color:var(--text-dim);
+  font-style:italic;text-align:center;
+  padding-bottom:5px;min-height:16px;
+}
+
+/* ── TABS ── */
+.tabs{
+  display:flex;background:var(--bg);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;overflow-x:auto;scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{
+  padding:8px 12px;
+  font-family:'Cinzel',serif;font-size:8px;
+  letter-spacing:0.18em;color:var(--text-dim);
+  cursor:pointer;white-space:nowrap;
+  border-bottom:2px solid transparent;
+  transition:all 0.2s;flex-shrink:0;
+}
+.tab:hover{color:var(--ash);}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding:12px 12px 50px;}
+.pane{display:none;}
+.pane.active{display:block;}
+
+/* ── SECTIONS ── */
+.sec{
+  background:var(--panel);
+  border:1px solid var(--border);
+  margin-bottom:9px;overflow:hidden;
+}
+.sec-hd{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 12px;cursor:pointer;
+  background:rgba(201,168,76,0.02);
+  border-bottom:1px solid var(--border);
+}
+.sec-hd:hover{background:rgba(201,168,76,0.06);}
+.sec-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;}
+.sec-arr{font-size:9px;color:var(--gold-dim);transition:transform 0.25s;}
+.sec.closed .sec-arr{transform:rotate(-90deg);}
+.sec.closed .sec-bd{display:none;}
+.sec-bd{padding:11px;}
+
+/* ── STATUS ── */
+.class-row2{
+  display:flex;align-items:center;
+  justify-content:space-between;gap:10px;
+  padding:8px 0;border-bottom:1px solid var(--border);
+}
+.class-row2:last-child{border-bottom:none;}
+.cls-name{font-family:'Cinzel',serif;font-size:11px;color:var(--gold-bright);}
+.bar-wrap{flex:1;height:2px;background:rgba(255,255,255,0.04);}
+.bar-inner{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));box-shadow:0 0 5px rgba(201,168,76,0.4);transition:width 0.8s ease;}
+.cls-lv{font-family:'Cinzel',serif;font-size:18px;color:var(--gold);min-width:48px;text-align:right;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
+.stat-c{
+  border:1px solid var(--border);background:rgba(255,255,255,0.01);
+  padding:7px 9px;position:relative;
+}
+.stat-c::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--gold);opacity:0.4;}
+.stat-c.az::before{background:var(--azure);}
+.stat-c.em::before{background:var(--ember);}
+.stat-lbl{font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.2em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:1px;}
+.stat-v{font-family:'Cinzel',serif;font-size:20px;color:var(--gold);line-height:1;}
+.stat-c.az .stat-v{color:var(--azure);}
+.stat-c.az .stat-lbl{color:var(--azure-dim);}
+.stat-c.em .stat-v{color:var(--ember);}
+
+/* resistances */
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.res-chip{
+  display:flex;align-items:center;gap:5px;
+  padding:4px 7px;border:1px solid var(--border);
+  opacity:0.25;transition:opacity 0.3s,border-color 0.3s;
+}
+.res-chip.on{opacity:1;}
+.res-chip.new{border-color:var(--gold-dim);}
+.rdot{width:4px;height:4px;border-radius:50%;background:#444;flex-shrink:0;}
+.res-chip.on .rdot{background:var(--green);box-shadow:0 0 4px var(--green);}
+.res-chip.new .rdot{background:var(--gold);box-shadow:0 0 6px var(--gold);}
+.rname{font-size:11px;color:var(--ash);flex:1;font-style:italic;}
+.rch{font-family:'Cinzel',serif;font-size:7px;color:var(--text-dim);}
+.res-chip.new .rch{color:var(--gold);}
+
+/* ── CHAPTER LOG ── */
+.ch-item{
+  border:1px solid var(--border);background:rgba(255,255,255,0.008);
+  margin-bottom:6px;overflow:hidden;cursor:pointer;
+}
+.ch-item-hd{
+  display:flex;gap:8px;align-items:flex-start;
+  padding:8px 11px;
+}
+.ch-item-hd:hover{background:rgba(201,168,76,0.03);}
+.ch-n{font-family:'Cinzel',serif;font-size:9px;color:var(--text-dim);min-width:22px;padding-top:2px;}
+.ch-t{font-family:'Cinzel',serif;font-size:11px;color:var(--ash);flex:1;line-height:1.3;}
+.ch-item.cur .ch-t{color:var(--gold);}
+.ch-item.cur .ch-n{color:var(--gold);}
+.ch-item.fut .ch-t{color:#2a2218;}
+.ch-item.fut .ch-n{color:#1e1810;}
+.ch-tags{display:flex;gap:3px;flex-wrap:wrap;padding-top:1px;}
+.ctag{font-size:7px;padding:1px 4px;border:1px solid;font-family:'Cinzel',serif;letter-spacing:0.05em;}
+.ctag.ding{border-color:var(--gold-dim);color:var(--gold);}
+.ctag.npc{border-color:var(--azure-dim);color:var(--azure);}
+.ctag.loc{border-color:var(--green-dim);color:var(--green);}
+.ctag.lore{border-color:var(--purple-dim);color:var(--purple);}
+.ctag.evo{border-color:#5a2a08;color:var(--ember);}
+.ch-body{display:none;padding:0 11px 10px;}
+.ch-item.open .ch-body{display:block;}
+.ch-desc{font-size:13px;color:var(--text-dim);font-style:italic;line-height:1.6;}
+
+/* WHY IT MATTERS */
+.why-block{
+  margin-top:7px;
+  padding:7px 10px;
+  background:rgba(201,168,76,0.03);
+  border-left:2px solid var(--gold);
+}
+.why-lbl{
+  font-family:'Cinzel',serif;font-size:7px;
+  letter-spacing:0.2em;color:var(--gold);
+  margin-bottom:3px;text-transform:uppercase;
+}
+.why-text{font-size:12px;color:var(--gold-dim);line-height:1.5;}
+
+/* ── NPCS ── */
+.npc-card{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.01);
+  padding:10px 11px;margin-bottom:7px;
+  position:relative;overflow:hidden;
+}
+.npc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;}
+.npc-card.ally::before{background:var(--green);}
+.npc-card.neutral::before{background:var(--gold);}
+.npc-card.enemy::before{background:var(--ember);}
+.npc-card.complex::before{background:var(--purple);}
+.npc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px;}
+.npc-name{font-family:'Cinzel',serif;font-size:12px;color:var(--gold-bright);}
+.npc-badge{font-family:'Cinzel',serif;font-size:7px;padding:2px 5px;border:1px solid;}
+.ally .npc-badge{border-color:var(--green-dim);color:var(--green);}
+.neutral .npc-badge{border-color:var(--gold-dim);color:var(--gold-dim);}
+.enemy .npc-badge{border-color:var(--ember-dim);color:var(--ember);}
+.complex .npc-badge{border-color:var(--purple-dim);color:var(--purple);}
+.npc-role{font-size:11px;color:var(--gold-dim);font-style:italic;margin-bottom:4px;}
+.npc-desc{font-size:13px;color:#6a6050;line-height:1.5;}
+.npc-why{
+  margin-top:6px;padding:5px 8px;
+  border-left:2px solid var(--gold-dim);
+  font-size:11px;color:var(--gold-dim);font-style:italic;line-height:1.4;
+}
+.npc-book{font-family:'Cinzel',serif;font-size:7px;color:var(--border2);margin-top:4px;letter-spacing:0.1em;}
+
+/* ── CLASS EVOLUTION ── */
+.evo-timeline{position:relative;padding-left:20px;}
+.evo-timeline::before{
+  content:'';position:absolute;left:6px;top:0;bottom:0;
+  width:1px;background:linear-gradient(180deg,var(--gold),var(--gold-dim),var(--border));
+}
+.evo-node{
+  position:relative;margin-bottom:12px;
+}
+.evo-node::before{
+  content:'';position:absolute;
+  left:-17px;top:6px;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--panel);border:1px solid var(--gold-dim);
+  transition:all 0.3s;
+}
+.evo-node.reached::before{
+  background:var(--gold);border-color:var(--gold);
+  box-shadow:0 0 8px rgba(201,168,76,0.6);
+}
+.evo-node.big::before{
+  width:12px;height:12px;left:-19px;top:4px;
+  background:var(--gold-bright);
+  box-shadow:0 0 14px rgba(201,168,76,0.8);
+}
+.evo-ch{font-family:'Cinzel',serif;font-size:8px;color:var(--gold-dim);margin-bottom:2px;}
+.evo-node.reached .evo-ch{color:var(--gold);}
+.evo-title{font-family:'Cinzel',serif;font-size:11px;color:var(--ash);margin-bottom:2px;}
+.evo-node.reached .evo-title{color:var(--gold-bright);}
+.evo-node.big .evo-title{color:var(--gold-bright);font-size:13px;}
+.evo-desc{font-size:12px;color:var(--text-dim);font-style:italic;line-height:1.4;}
+.evo-why{
+  margin-top:4px;padding:4px 8px;
+  border-left:2px solid var(--gold-dim);
+  font-size:11px;color:var(--gold-dim);font-style:italic;
+}
+.evo-node.reached .evo-why{border-left-color:var(--gold);color:#8a7040;}
+
+/* ── LORE THREADS ── */
+.lore-card{
+  border:1px solid var(--border);background:var(--panel);
+  margin-bottom:8px;overflow:hidden;
+}
+.lore-hd{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 11px;cursor:pointer;
+}
+.lore-hd:hover{background:rgba(255,255,255,0.02);}
+.lore-icon{font-size:16px;flex-shrink:0;}
+.lore-title{font-family:'Cinzel',serif;font-size:11px;color:var(--gold-bright);flex:1;}
+.lore-status{font-family:'Cinzel',serif;font-size:7px;padding:2px 6px;border:1px solid;}
+.lore-status.open{border-color:var(--ember-dim);color:var(--ember);}
+.lore-status.partial{border-color:var(--gold-dim);color:var(--gold-dim);}
+.lore-status.known{border-color:var(--green-dim);color:var(--green);}
+.lore-body{display:none;padding:0 11px 11px;}
+.lore-card.open-body .lore-body{display:block;}
+.lore-known{
+  background:rgba(104,184,112,0.05);border-left:2px solid var(--green-dim);
+  padding:6px 9px;margin-bottom:6px;
+}
+.lore-known-lbl{font-family:'Cinzel',serif;font-size:7px;color:var(--green);letter-spacing:0.15em;margin-bottom:2px;}
+.lore-unknown{
+  background:rgba(208,102,58,0.05);border-left:2px solid var(--ember-dim);
+  padding:6px 9px;
+}
+.lore-unknown-lbl{font-family:'Cinzel',serif;font-size:7px;color:var(--ember);letter-spacing:0.15em;margin-bottom:2px;}
+.lore-text{font-size:12px;color:var(--text-dim);font-style:italic;line-height:1.5;}
+
+/* ── WORLD MAP ── */
+.map-region{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.01);
+  padding:9px 11px;margin-bottom:6px;
+  display:flex;gap:10px;align-items:flex-start;
+}
+.map-icon{font-size:18px;flex-shrink:0;padding-top:2px;}
+.map-info{flex:1;}
+.map-name{font-family:'Cinzel',serif;font-size:11px;color:var(--gold-bright);margin-bottom:2px;}
+.map-desc{font-size:12px;color:var(--text-dim);font-style:italic;line-height:1.4;}
+.map-status{font-family:'Cinzel',serif;font-size:7px;padding:2px 6px;border:1px solid;flex-shrink:0;align-self:flex-start;}
+.map-status.v{border-color:var(--green-dim);color:var(--green);}
+.map-status.c{border-color:var(--gold-dim);color:var(--gold-dim);}
+.map-status.l{border-color:var(--border2);color:var(--border2);}
+
+/* ── NOTES ── */
+textarea.notes-ta{
+  width:100%;background:rgba(255,255,255,0.015);
+  border:1px solid var(--border);color:var(--text);
+  font-family:'Crimson Pro',serif;font-size:14px;
+  padding:9px 11px;resize:vertical;min-height:90px;
+  outline:none;line-height:1.6;
+}
+textarea.notes-ta:focus{border-color:var(--gold-dim);}
+textarea.notes-ta::placeholder{color:#1e1a14;}
+.save-btn{
+  margin-top:6px;padding:6px 14px;
+  background:transparent;border:1px solid var(--gold-dim);
+  color:var(--gold-dim);font-family:'Cinzel',serif;
+  font-size:8px;letter-spacing:0.2em;cursor:pointer;
+  transition:all 0.2s;
+}
+.save-btn:hover{background:rgba(201,168,76,0.1);color:var(--gold);}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:16px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:#160e06;border:1px solid var(--gold);
+  padding:7px 16px;font-family:'Cinzel',serif;
+  font-size:10px;color:var(--gold);letter-spacing:0.08em;
+  box-shadow:0 0 20px rgba(201,168,76,0.25);
+  transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  z-index:999;white-space:nowrap;
+}
+#toast.show{transform:translateX(-50%) translateY(0);}
+
+/* misc */
+.divider{height:1px;background:var(--border);margin:8px 0;}
+.note-tag{display:inline-block;font-family:'Cinzel',serif;font-size:7px;padding:1px 5px;border:1px solid var(--gold-dim);color:var(--gold-dim);margin-bottom:6px;}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar" id="topbar">
+  <div class="title-row">
+    <span class="app-title">⚔ AZARINTH</span>
+    <span class="app-sub">Series Companion · All Books</span>
+  </div>
+  <div class="book-switcher">
+    <div class="bk-btn b1 active" onclick="setBook(1)">BOOK I<span class="bk-label">Ch 1–74</span></div>
+    <div class="bk-btn b2" onclick="setBook(2)">BOOK II<span class="bk-label">Ch 75–151</span></div>
+    <div class="bk-btn b3" onclick="setBook(3)">BOOK III<span class="bk-label">Ch 152–323</span></div>
+    <div class="bk-btn b4" onclick="setBook(4)">BOOK IV<span class="bk-label">Ch 324–439</span></div>
+  </div>
+  <div class="ch-row">
+    <span class="ch-lbl">CH</span>
+    <span class="ch-num" id="chNum">44</span>
+    <input type="range" id="chSlider" min="1" max="74" value="44">
+  </div>
+  <div class="ch-name-bar" id="chNameBar">"Newcomers" — Taleen grind · Centurion wall</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('status')">📊 STATUS</div>
+  <div class="tab" onclick="showTab('log')">📜 CH LOG</div>
+  <div class="tab" onclick="showTab('npcs')">👥 NPCS</div>
+  <div class="tab" onclick="showTab('evo')">⚡ EVOLUTION</div>
+  <div class="tab" onclick="showTab('lore')">📖 LORE</div>
+  <div class="tab" onclick="showTab('map')">🗺 WORLD</div>
+  <div class="tab" onclick="showTab('notes')">✏ NOTES</div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- ═══ STATUS ═══ -->
+<div class="pane active" id="pane-status">
+  <div class="sec">
+    <div class="sec-hd" onclick="tog(this)"><span class="sec-title">⚔ Classes</span><span class="sec-arr">▼</span></div>
+    <div class="sec-bd">
+      <div class="class-row2">
+        <span class="cls-name">Azarinth Healer</span>
+        <div class="bar-wrap"><div class="bar-inner" id="bar-ah" style="width:80%"></div></div>
+        <span class="cls-lv" id="lv-ah">~145</span>
+      </div>
+      <div class="class-row2">
+        <span class="cls-name">Ash Wielder</span>
+        <div class="bar-wrap"><div class="bar-inner" id="bar-aw" style="width:60%"></div></div>
+        <span class="cls-lv" id="lv-aw">~113</span>
+      </div>
+      <div style="margin-top:8px;font-size:11px;color:var(--text-dim);font-style:italic;" id="class-note">
+        Ash Wielder body enhancement bonus: 100% (evolved ch.40). Slide chapter to track progression.
+      </div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-hd" onclick="tog(this)"><span class="sec-title">📊 Stats</span><span class="sec-arr">▼</span></div>
+    <div class="sec-bd">
+      <div style="font-size:10px;color:var(--text-dim);font-style:italic;margin-bottom:7px;">Routing: heavy Vitality → Intelligence → Dexterity (Edwin's advice, ch.43)</div>
+      <div class="stat-grid">
+        <div class="stat-c"><div class="stat-lbl">Vitality</div><div class="stat-v" id="sv">~550</div></div>
+        <div class="stat-c az"><div class="stat-lbl">Intelligence</div><div class="stat-v" id="si">~450</div></div>
+        <div class="stat-c"><div class="stat-lbl">Strength</div><div class="stat-v" id="ss">~200</div></div>
+        <div class="stat-c az"><div class="stat-lbl">Dexterity</div><div class="stat-v" id="sd">~260</div></div>
+        <div class="stat-c em"><div class="stat-lbl">Endurance</div><div class="stat-v" id="se">~150</div></div>
+        <div class="stat-c az"><div class="stat-lbl">Wisdom</div><div class="stat-v" id="sw">~200</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-hd" onclick="tog(this)"><span class="sec-title">🛡 Resistances</span><span class="sec-arr">▼</span></div>
+    <div class="sec-bd">
+      <div class="res-grid" id="res-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CHAPTER LOG ═══ -->
+<div class="pane" id="pane-log">
+  <div id="ch-log-list"></div>
+</div>
+
+<!-- ═══ NPCS ═══ -->
+<div class="pane" id="pane-npcs">
+  <div id="npc-list"></div>
+</div>
+
+<!-- ═══ CLASS EVOLUTION ═══ -->
+<div class="pane" id="pane-evo">
+  <div class="sec">
+    <div class="sec-hd" onclick="tog(this)"><span class="sec-title">🌀 Azarinth Healer — Evolution Path</span><span class="sec-arr">▼</span></div>
+    <div class="sec-bd">
+      <div class="evo-timeline" id="evo-ah"></div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-hd" onclick="tog(this)"><span class="sec-title">🌑 Ash Wielder — Evolution Path</span><span class="sec-arr">▼</span></div>
+    <div class="sec-bd">
+      <div class="evo-timeline" id="evo-aw"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LORE THREADS ═══ -->
+<div class="pane" id="pane-lore">
+  <div id="lore-list"></div>
+</div>
+
+<!-- ═══ WORLD MAP ═══ -->
+<div class="pane" id="pane-map">
+  <div style="font-size:11px;color:var(--text-dim);font-style:italic;margin-bottom:10px;padding:6px 9px;border-left:2px solid var(--gold-dim);">
+    Elos is massive. Ilea has seen a fraction of it. Status updates as you move through chapters.
+  </div>
+  <div id="map-list"></div>
+</div>
+
+<!-- ═══ NOTES ═══ -->
+<div class="pane" id="pane-notes">
+  <div class="sec">
+    <div class="sec-hd" onclick="tog(this)"><span class="sec-title">✏ Your Notes</span><span class="sec-arr">▼</span></div>
+    <div class="sec-bd">
+      <textarea class="notes-ta" id="user-notes" placeholder="Theories, questions, things you noticed...&#10;&#10;'Why was Vor Elenthir afraid of the Azarinth specifically?'&#10;'What connects the Taleen and the Shadow&#39;s Hand history?'&#10;'Where did Eve's hatred of nobles come from?'"></textarea>
+      <button class="save-btn" onclick="saveNotes()">SAVE NOTES</button>
+      <div id="save-msg" style="font-size:9px;color:var(--text-dim);margin-top:4px;font-style:italic;"></div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-hd" onclick="tog(this)"><span class="sec-title">🥚 Easter Eggs — Things to Notice</span><span class="sec-arr">▼</span></div>
+    <div class="sec-bd" id="egg-list"></div>
+  </div>
+</div>
+
+</div><!-- /content -->
+<div id="toast">🔔 DING</div>
+
+<script>
+// ═══════════════════════════════════════
+// BOOK CONFIG
+// ═══════════════════════════════════════
+const BOOKS = {
+  1:{start:1,end:74,color:'#c9a84c'},
+  2:{start:75,end:151,color:'#5ab4d4'},
+  3:{start:152,end:323,color:'#d4663a'},
+  4:{start:324,end:439,color:'#9060c8'},
+};
+let currentBook = 1;
+let currentCh = 44;
+
+// ═══════════════════════════════════════
+// CHAPTER DATA — all books
+// ═══════════════════════════════════════
+const CHAPTERS = [
+  // ── BOOK 1 ──
+  {n:1,b:1,t:"Where is the Magic?",tags:[],
+   desc:"Ilea's boring Earth life. Kickboxing, fast food, starting college. Then she wakes up in a forest on Elos.",
+   why:"Rhaegar establishes immediately: she has zero chosen-one energy. No prophecy, no destiny. She's nobody. That's the whole point."},
+  {n:2,b:1,t:"Big Bad Wolves",tags:["ding"],
+   desc:"First monsters. First panic. First kill. The system reveals itself. Poison Resistance unlocked from mystery berries she ate.",
+   why:"The berry scene is her thesis statement — she survives through stubbornness, not heroics. And she immediately starts accidentally farming resistances."},
+  {n:3,b:1,t:"Glowing Moss",tags:["ding","loc"],
+   desc:"Finds the Azarinth temple ruins. Healing fountain. Ancient library. She can read the text for some reason.",
+   why:"The fountain is Azarinth infrastructure — built to recruit new members. She stumbled into the last intact remnant of an extinct civilization."},
+  {n:4,b:1,t:"Exploration",tags:["ding"],
+   desc:"Reads Azarinth tomes. Class offer accepted. Becomes an Azarinth Healer. First stat screen.",
+   why:"She picked the class because it sounded strong, not because she understood what it was. She had no idea she just became the only active Azarinth Healer in the world."},
+  {n:5,b:1,t:"Civilization",tags:["loc"],
+   desc:"Leaves the forest. First human contact. Discovers Ravenhall exists.",why:""},
+  {n:6,b:1,t:"Library",tags:["npc"],
+   desc:"Edwin and Aliana appear. She learns about the Shadow's Hand. The world starts making sense.",
+   why:"Edwin is the character who understands the game's numbers. Pay attention every time he explains a mechanic — it always becomes relevant later."},
+  {n:7,b:1,t:"Broken Bones",tags:["ding"],
+   desc:"Arena fights. Guild registration. She holds back, then doesn't.",why:""},
+  {n:8,b:1,t:"Death",tags:["ding"],
+   desc:"Heat Resistance unlocked fighting scaled dogs. First near-death experience. She is not upset about it.",
+   why:"Her reaction to almost dying is the clearest signal that she's not like other protagonists. She's delighted."},
+  {n:9,b:1,t:"Graves to Dig",tags:[],
+   desc:"Aftermath. She decides this world is better than college.",why:""},
+  {n:10,b:1,t:"Catch a Ride",tags:["loc"],desc:"Caravan. First glimpse of Elos at scale.",why:""},
+  {n:11,b:1,t:"City Life",tags:["loc","npc"],desc:"Ravenhall properly. Shadow's Hand HQ. She signs up.",why:""},
+  {n:12,b:1,t:"The Arena",tags:["ding"],
+   desc:"Arena circuit. She climbs fast. People start noticing her healing looks wrong.",
+   why:"The arena is her first public benchmark. Everyone misreads her class here."},
+  {n:13,b:1,t:"A Relaxing Afternoon",tags:[],
+   desc:"Downtime. Edwin gives stat routing advice for the first time. She half-listens.",why:""},
+  {n:14,b:1,t:"Party Life",tags:["npc"],
+   desc:"Team 34 assigned. Claire Russel and Kyrian met properly.",
+   why:"Claire is quietly the most important non-combat character in the series. Watch what she builds in Ravenhall."},
+  {n:15,b:1,t:"More Bad Dogs",tags:["ding"],desc:"Team 34 first mission. She realizes her teammates are much more careful than her.",why:""},
+  {n:16,b:1,t:"Loss",tags:["ding"],
+   desc:"Pain Tolerance resistance unlocked. Fire training — deliberate self-harm for gains.",
+   why:"This is the chapter that makes clear she's addicted to the system itself, not just survival."},
+  {n:17,b:1,t:"Bracers and Books",tags:["lore"],
+   desc:"Edwin explains class mechanics, stat multipliers, body enhancement stacking. Dense.",
+   why:"This chapter is the instruction manual. The multiplier stack he describes is what makes her numbers insane by Book 2."},
+  {n:18,b:1,t:"Through the Fire and Flames",tags:["ding"],desc:"Major fire dungeon arc. Heat Resistance climbing fast.",why:""},
+  {n:19,b:1,t:"The Bigger They Are",tags:["ding"],desc:"Boss encounter. First one-shot threat.",why:""},
+  {n:20,b:1,t:"Superhero Landing",tags:["ding"],desc:"Blink starts evolving. She falls from great heights to test it.",why:""},
+  {n:21,b:1,t:"The Unlife",tags:["ding","lore"],desc:"Undead dungeon. Ravenhall's darker history hinted.",why:""},
+  {n:22,b:1,t:"Consequences",tags:["ding"],
+   desc:"Mental Resistance unlocked — a creature attacked her mind. She punched it for being invasive.",why:""},
+  {n:23,b:1,t:"Sun",tags:["loc"],desc:"Surface again. She's growing faster than her teammates.",why:""},
+  {n:24,b:1,t:"The Queen",tags:["ding","npc"],desc:"Significant boss fight. First genuinely dangerous creature at this stage.",why:""},
+  {n:25,b:1,t:"Woman and Monster",tags:["npc"],desc:"NPC encounter that shows not everything in Elos wants to kill her.",why:""},
+  {n:26,b:1,t:"Not a Title",tags:["ding"],desc:"Level milestone. Ash Wielder synergy starting to show.",why:""},
+  {n:27,b:1,t:"Road Trip",tags:["loc","npc"],
+   desc:"Travel arc. People keep guessing her level wrong.",
+   why:"Her build is illegible to outside observers. That's a feature — her dual class creates a combat style with no existing label in Elos."},
+  {n:28,b:1,t:"Actual Healing",tags:["npc"],desc:"She heals someone who actually needed it. She's awkward about it.",why:""},
+  {n:29,b:1,t:"Force of Nature",tags:["ding"],
+   desc:"First real 'I cannot win this fight' moment.",
+   why:"Rhaegar uses these wall encounters to show grind has a ceiling. Same concept as the Centurion later."},
+  {n:30,b:1,t:"Claymore",tags:["ding","npc"],desc:"Weapon-user NPC. She doubles down on fists.",why:""},
+  {n:31,b:1,t:"Arrival",tags:["loc"],desc:"New region. Skills start adapting to different enemy types.",why:""},
+  {n:32,b:1,t:"Slice of Life",tags:[],desc:"Rest chapter. Eating, talking, existing.",why:""},
+  {n:33,b:1,t:"#Traveling",tags:["loc"],desc:"More world travel. She starts cataloguing dungeons.",why:""},
+  {n:34,b:1,t:"Dungeon Diving",tags:["ding","lore"],
+   desc:"Fear Resistance unlocked. She faces something terrifying and stands her ground. Gets very wet.",
+   why:"The wiki note for this one: 'Ilea gets incredibly wet from facing her fears.' The resistance training system rewards deliberately confronting what scares you."},
+  {n:35,b:1,t:"Outclassed",tags:["ding"],
+   desc:"First Taleen dungeon contact. Constructs are well above her level.",
+   why:"This is the start of the Taleen arc. The architecture you're seeing is the inside of an ancient automated war facility that's still running on its original orders."},
+  {n:36,b:1,t:"Sparring and Advice",tags:["npc"],desc:"Edwin's second detailed build talk. She actually listens.",why:""},
+  {n:37,b:1,t:"Azarinth Leecher",tags:["ding"],
+   desc:"Reversal mechanic introduced — using healing magic offensively.",
+   why:"This is the hidden tech in her build. She can channel Destruction in reverse, which carries mana intrusion properties. Almost nobody knows this exists."},
+  {n:38,b:1,t:"Centurion",tags:["ding","lore"],
+   desc:"First Centurion encounter. She cannot damage it. At all.",
+   why:"The Centurion learning her blink distance is not just a gameplay detail. It's an ancient construct doing exactly what it was built to do 3000 years ago."},
+  {n:39,b:1,t:"Traps",tags:["ding"],desc:"Trap rooms. Sphere perception saves her constantly.",why:""},
+  {n:40,b:1,t:"Fire and Ash",tags:["ding","evo"],
+   desc:"🔥 BIG ONE. Ash Wielder evolves. Body Enhancement 20% → 100%. Form of Ember hits 2nd tier. +7 AH levels, +5 AW levels.",
+   why:"The 100% body enhancement multiplier Edwin explained in ch.17 becomes real here. Every aura she runs now hits in a completely different weight class."},
+  {n:41,b:1,t:"Trash Compactor",tags:["ding"],desc:"Dungeon trap gauntlet. She starts reading dungeon patterns.",why:""},
+  {n:42,b:1,t:"Sushi",tags:["ding"],
+   desc:"Fights a water/wind mage. Tanks every spell deliberately. Water Magic + Wind Magic resistances earned.",
+   why:"She asked the mage to keep attacking her. The mage thought it was a trap. It wasn't."},
+  {n:43,b:1,t:"Reasons",tags:[],
+   desc:"Reflective chapter. Why does she fight? Edwin's routing sinks in. Commits to Vit/Int/Dex.",
+   why:"The closest thing to a 'who am I' moment Ilea gets. Rhaegar keeps it brief and honest."},
+  {n:44,b:1,t:"Newcomers",tags:["ding","lore"],
+   desc:"📍 YOUR CURRENT CHAPTER. 43 Guardians destroyed. AH hits ~145. Centurion encounter — zero damage. AH Perception 2nd lv.5.",
+   why:"The Centurion is a hard ceiling she can't brute-force past. Everything from ch.45 onward is about finding a different approach."},
+  {n:45,b:1,t:"Cake",tags:["npc"],desc:"New people appear in the dungeon. She's not alone down there anymore.",why:""},
+  {n:46,b:1,t:"Alice",tags:["ding","npc"],
+   desc:"Alice Forkspear, lightning mage, noble. Ilea earns Lightning Magic Resistance by letting Alice electrocute her repeatedly and asking for more.",
+   why:"Alice is unusual — she's connected to the Corinth Order but untouchable because of her noble house. Keep her in mind. She reappears."},
+  {n:47,b:1,t:"Darkness",tags:["ding","lore"],desc:"Deeper Taleen levels. Something down here is wrong.",why:""},
+  {n:48,b:1,t:"Treasures and Fire",tags:["ding","lore"],desc:"Taleen artifacts. The scale of this civilization starts to register.",why:""},
+  {n:49,b:1,t:"On the Trail of History",tags:["lore"],
+   desc:"Azarinth Order history fully revealed. Why the class is extinct. What actually happened to them.",
+   why:"Vor Elenthir — an ancient being of enormous power — hunted and wiped out the entire Order because he feared what their arcane magic could evolve into. He wasn't wrong."},
+  {n:50,b:1,t:"Ashen Healer",tags:["ding"],
+   desc:"Class synergy milestone. People watching her fight can't identify what class she is.",why:""},
+  {n:51,b:1,t:"That's No Bird",tags:["ding","npc"],desc:"Aerial enemy type. 3D blink usage begins.",why:""},
+  {n:52,b:1,t:"New Companions and Enemies",tags:["npc"],desc:"Team dynamics shift. Someone new joins the dungeon run.",why:""},
+  {n:53,b:1,t:"Return",tags:["loc"],desc:"Back to Ravenhall. Feels smaller now.",why:""},
+  {n:54,b:1,t:"Cards and Poison",tags:["npc","ding"],desc:"Someone tries to poison her. She's disappointed it doesn't work better.",why:""},
+  {n:55,b:1,t:"Dungeon Crawl",tags:["ding","loc"],desc:"New dungeon — different rules than Taleen.",why:""},
+  {n:56,b:1,t:"Clean-up Crew",tags:["ding"],desc:"Jobs other guilds won't take. Her reputation is spreading.",why:""},
+  {n:57,b:1,t:"Screaming Steel",tags:["ding"],desc:"Metal-based enemies. Her magic interacts unusually.",why:""},
+  {n:58,b:1,t:"Resisting",tags:["ding"],
+   desc:"Massive resistance session. Ice, Crystal, Earth, Arcane Magic — five resistances, one chapter. She spent a day getting pelted by different mages.",
+   why:"The wiki: 'Ilea willingly gets pelted by rocks to assert dominance.' Each mage thought they were doing her a favor. She was running an optimization loop."},
+  {n:59,b:1,t:"Praetorian",tags:["ding","lore"],
+   desc:"Corrosion, Light, Mist resistances. New Taleen unit — harder than the Centurion. Another wall.",why:""},
+  {n:60,b:1,t:"Scythes and Swords",tags:["ding","npc"],
+   desc:"Curse Magic Resistance unlocked. Weapon-user NPC. Fighting philosophy debate. She wins with her fists.",why:""},
+  {n:61,b:1,t:"Sharing is Caring",tags:["npc"],desc:"She shares dungeon knowledge with trusted contacts.",why:""},
+  {n:62,b:1,t:"Survivors",tags:["npc","lore"],desc:"People who survived something terrible. She helps quietly.",why:""},
+  {n:63,b:1,t:"Politics and Power",tags:["lore","npc"],
+   desc:"Ravenhall's power structure revealed. Shadow's Hand is bigger than she understood.",
+   why:"Claire is at the center of Ravenhall's politics. Everything she's been quietly building is starting to show."},
+  {n:64,b:1,t:"Snow and Ice",tags:["ding","loc"],desc:"Northern regions. Cold magic everywhere. New ecology.",why:""},
+  {n:65,b:1,t:"Shadows",tags:["ding","lore"],
+   desc:"Shadow's Hand senior members. What 'Shadow' actually means in this world.",
+   why:"The Shadow's Hand name is ancient — possibly contemporary with the Azarinth Order. Rhaegar drops this quietly. It matters."},
+  {n:66,b:1,t:"Hunting",tags:["ding"],desc:"Pure hunt arc. Efficiency mode.",why:""},
+  {n:67,b:1,t:"Evolution",tags:["ding","evo"],
+   desc:"🔥 CLASS EVOLUTION. Major threshold hit. New skill options.",
+   why:"Do not blink. The ding sequence here is the best in Book 1. The flavor text on the evolution options tells you a lot about where she's headed."},
+  {n:68,b:1,t:"Books and Nobles",tags:["npc","lore"],desc:"Noble politics. She buys more books. She eats well.",why:""},
+  {n:69,b:1,t:"Return",tags:["loc"],desc:"Back somewhere familiar. It's changed. She's changed more.",why:""},
+  {n:70,b:1,t:"A Dark Night",tags:["ding","npc"],desc:"Night combat. Urban setting. Someone is hunting Hand members.",why:""},
+  {n:71,b:1,t:"Old Beings",tags:["ding","lore"],
+   desc:"Something ancient. Not human, not Taleen. Different category of entity entirely.",
+   why:"This is your first real glimpse of what the world's ceiling looks like. The power gap between Ilea and what she's looking at is enormous."},
+  {n:72,b:1,t:"Decisions and Ale",tags:["npc"],desc:"Major character decisions. She drinks good ale and makes a call.",why:""},
+  {n:73,b:1,t:"Ravenhall",tags:["loc","lore"],
+   desc:"The city's full history. What it was. What it is now. What's coming.",
+   why:"The setup for Book 2 is built here. Claire's position in Ravenhall becomes clear."},
+  {n:74,b:1,t:"Book 1 Finale",tags:["ding","lore","npc"],
+   desc:"End of Book 1. Stakes arrive. Everything she's built gets tested.",
+   why:"Book 2 starts immediately where this ends. Don't pause."},
+
+  // ── BOOK 2 ──
+  {n:75,b:2,t:"The Hand",tags:["loc","npc"],
+   desc:"She formally enters the Shadow's Hand proper. A different tier of fighters than what she's seen.",
+   why:"The Hand's senior members operate at a level that makes even Ilea feel like a newcomer. This is intentional — Rhaegar resets the relative power scale."},
+  {n:76,b:2,t:"Team",tags:["npc"],
+   desc:"Team 34 forms. Ilea, Eve, Trian, Kyrian, Claire. Claire is the tactics instructor.",
+   why:"These five will define Book 2. Eve and Trian hate each other immediately. Ilea has to be the buffer — an unusual role for her."},
+  {n:77,b:2,t:"Training",tags:["ding"],
+   desc:"Shadow's Hand training regimen begins. Sparring against teammates. Resistance farming through friendly fire.",
+   why:"Ilea's version of training: ask everyone to hit her as hard as they can. Her teammates take a while to process this."},
+  {n:78,b:2,t:"Excursion",tags:["ding","loc"],
+   desc:"First team mission outside Ravenhall. Different threat type than solo dungeon runs.",
+   why:"Team combat reveals what she's weak at — she's a fantastic solo fighter but has no tactical vocabulary for group play."},
+  {n:79,b:2,t:"Monster",tags:["ding"],
+   desc:"Major creature encounter. Team coordination tested hard.",why:""},
+  {n:80,b:2,t:"Nobility",tags:["npc","lore"],
+   desc:"Trian's noble background becomes relevant. Tension with Eve escalates.",
+   why:"Eve hates nobles for reasons that haven't been revealed yet. Trian is not what Eve assumes. This conflict drives a lot of Book 2's character work."},
+  {n:81,b:2,t:"Class",tags:["evo","ding"],
+   desc:"Skill evolution options appear. Ilea makes a significant class choice.",
+   why:"Every evolution choice is a statement about who she's becoming. Watch what she picks and what she turns down."},
+  {n:82,b:2,t:"Mana Drain",tags:["ding"],
+   desc:"Mana Drain + Health Drain resistances unlocked. She beats up a 'rich boy' for them. Twice.",
+   why:"The wiki description: 'Ilea beats up a rich boy.' He was actually a willing sparring partner. She may have been too enthusiastic."},
+  {n:83,b:2,t:"Demons",tags:["ding","lore"],
+   desc:"Demon threat introduced. Not the same category as dungeon monsters — these are organized.",
+   why:"The demon invasion arc is what Book 2 is building toward. Elder Strand is connected."},
+  {n:84,b:2,t:"Viscera",tags:["loc","npc"],
+   desc:"New city. Different power structure than Ravenhall. Shadow's Hand has limited reach here.",why:""},
+  {n:85,b:2,t:"Elves",tags:["lore","npc"],
+   desc:"First real elf contact. They are nothing like fantasy elves — older, stranger, and very hostile.",
+   why:"The elf-human conflict has deep roots. The elves aren't attacking randomly. There's a reason, and it connects to things much older than the current political situation."},
+  {n:86,b:2,t:"Fire",tags:["ding"],desc:"Major combat arc. Team pushed to its limits.",why:""},
+  {n:87,b:2,t:"Aftermath",tags:["npc"],
+   desc:"Team recovers. Relationships shift after surviving something serious together.",why:""},
+  {n:88,b:2,t:"Vampyr",tags:["ding","npc"],
+   desc:"Trian's vampyric abilities come out in a sparring match with Ilea. He drains her significantly.",
+   why:"Trian has been holding back. A lot. The lightning mage thing is real, but it's not the whole picture of what he is."},
+  {n:89,b:2,t:"Politics",tags:["lore","npc"],
+   desc:"Shadow's Hand internal politics. The five Elders revealed. Power structures within the guild.",
+   why:"Elder Strand is one of the five. Keep his name. He's connected to things that shouldn't be possible from inside the Hand."},
+  {n:90,b:2,t:"North",tags:["loc","lore"],
+   desc:"Northern regions discussed at the Hand level. Something is wrong up there.",
+   why:"The North is not just a cold place. It's where the Taleen civilization's remnants are most concentrated, and where something ancient is active."},
+  {n:91,b:2,t:"Blast",tags:["ding"],
+   desc:"Blast Resistance unlocked. She flaunts her wealth at the wrong time — or exactly the right time.",
+   why:"The wiki: 'Ilea flaunts her wealth at the wrong time (or the right time).' She is extremely unbothered by explosions."},
+  {n:92,b:2,t:"Iana",tags:["npc"],
+   desc:"Iana introduced — enchantress, daughter of Balduur, research focus on teleportation gates.",
+   why:"Teleportation gate research sounds academic. It becomes strategic. Iana is not a side character."},
+  {n:93,b:2,t:"Dungeon — Taleen Deep",tags:["ding","loc"],
+   desc:"Deeper Taleen sections than Book 1. New construct types. The architecture gets stranger.",why:""},
+  {n:94,b:2,t:"Letters",tags:["npc","lore"],
+   desc:"Information passes between characters off-screen. The world is moving without Ilea.",
+   why:"Claire's Ravenhall project is developing. Rhaegar starts cutting to other POVs to show Ilea isn't the only force reshaping things."},
+  {n:95,b:2,t:"Trust",tags:["npc"],
+   desc:"Eve and Trian conflict reaches a turning point. Ilea brokers something that doesn't involve punching.",why:""},
+  {n:96,b:2,t:"Growth",tags:["ding","evo"],
+   desc:"Team levels significantly. Individual class evolutions for multiple members.",
+   why:"Watching her teammates evolve shows what a healthy build progression looks like outside of Ilea's chaos-first approach."},
+  {n:97,b:2,t:"Invasion Begins",tags:["lore","npc"],
+   desc:"The demon invasion starts. Elder Strand's involvement becomes clear. The Hand is compromised from inside.",
+   why:"Strand wasn't just a corrupt Elder — he deliberately caused the invasion. The Hand's independence, its core value, was violated from within."},
+  {n:98,b:2,t:"City Under Siege",tags:["ding","loc"],
+   desc:"Ravenhall under attack. Ilea fights across the city. Scale of the invasion is enormous.",why:""},
+  {n:99,b:2,t:"The Elders",tags:["npc","lore"],
+   desc:"Hand Elders mobilize. What Elder-level power looks like in practice.",
+   why:"Elder Pierce and Elder Verena are operating at a level that contextualizes where Ilea needs to get to."},
+  {n:100,b:2,t:"Demon Realm",tags:["ding","lore","evo"],
+   desc:"🔥 BOOK 2 MIDPOINT. Ilea and Trian get pulled into the Demon Realm. Cut off from Elos entirely.",
+   why:"Everything changes here. This is not a dungeon with an exit door. The Demon Realm operates on different rules and the enemies are not the constructs she's been grinding."},
+  {n:101,b:2,t:"Stranded",tags:["npc"],
+   desc:"Just Ilea and Trian. Demon Realm survival. No Hand, no team, no support.",
+   why:"Trian becomes the character he was always going to be here. The noble exterior drops. Watch him."},
+  {n:102,b:2,t:"Dark Magic",tags:["ding"],
+   desc:"Dark Magic Resistance unlocked. Team 34 fights something that used to be a person.",
+   why:"The wiki: 'Team 34 beat up a lost homeless person.' Context: it was a demon. Mostly."},
+  {n:103,b:2,t:"Survive",tags:["ding"],
+   desc:"Demon Realm survival arc deepens. New demon types, different from what invaded Elos.",why:""},
+  {n:104,b:2,t:"Ritual",tags:["lore"],
+   desc:"The purpose of the demon invasion becomes clearer. Strand was running a ritual, not a conquest.",
+   why:"The invasion wasn't meant to destroy Ravenhall. It was a test — or a sacrifice. The full picture becomes clearer later."},
+  {n:105,b:2,t:"Power",tags:["ding","evo"],
+   desc:"Major power jump in the Demon Realm. Forced evolution under pressure.",
+   why:"The Demon Realm accelerates her growth in ways normal grinding doesn't. Pressure and necessity push class evolutions that would take months otherwise."},
+  {n:106,b:2,t:"Friends",tags:["npc"],
+   desc:"Trian and Ilea dynamic solidifies. Something like genuine friendship, formed under extreme circumstances.",why:""},
+  {n:107,b:2,t:"Exit",tags:["ding","loc"],
+   desc:"They find a way back to Elos. The Demon Realm leaves marks.",
+   why:"They come back different. Trian especially. The noble from Virilya who entered is not the person who leaves."},
+  {n:108,b:2,t:"Aftermath — Ravenhall",tags:["loc","npc"],
+   desc:"Ravenhall after the invasion. Claire has been holding things together.",
+   why:"Claire's competence during the invasion cements her position. She built something real while Ilea was punching demons."},
+  {n:109,b:2,t:"Strand",tags:["lore","npc"],
+   desc:"Elder Strand's fate resolved. Urn assassinated for the betrayal.",
+   why:"The Hand losing two Elders changes the internal power balance significantly. Claire becomes more central."},
+  {n:110,b:2,t:"Recovery",tags:["npc"],
+   desc:"Team 34 recovers. Plans for what comes next.",why:""},
+  {n:111,b:2,t:"House Alymie",tags:["lore","npc"],
+   desc:"Trian's family situation revealed. House Alymie attacked by House Birmingale. Most of his family killed, wealth stolen.",
+   why:"This is the tragedy Trian has been carrying the whole book. The revenge arc this sets up runs into Book 3."},
+  {n:112,b:2,t:"North — First Steps",tags:["loc","lore"],
+   desc:"The group heads toward the North. What they find doesn't match the rumors.",
+   why:"The North is one of the series' biggest mysteries. The Taleen activity here is denser and older than what she encountered in Book 1's dungeons."},
+  {n:113,b:2,t:"New Creatures",tags:["ding"],
+   desc:"Northern fauna is in a different tier than the south. She is not immediately winning.",why:""},
+  {n:114,b:2,t:"Ancient Ruins",tags:["lore","loc"],
+   desc:"Taleen ruins at a scale that dwarfs the teleportation dungeon from Book 1.",
+   why:"The Taleen civilization didn't just build dungeons. They built cities. The North is where their real infrastructure was."},
+  {n:115,b:2,t:"The Meadow",tags:["npc","lore"],
+   desc:"Meadow introduced — not human, not elf, not Taleen. Something older.",
+   why:"Meadow is one of the most important characters in the series and one of the hardest to categorize. Pay close attention to everything they say."},
+  {n:116,b:2,t:"Levels",tags:["ding","evo"],
+   desc:"Significant level push in Northern conditions.",why:""},
+  {n:117,b:2,t:"Truth",tags:["lore"],
+   desc:"More Azarinth Order lore surfaces. Something about their end that contradicts the official version.",why:""},
+  {n:118,b:2,t:"Ice and Death",tags:["ding"],
+   desc:"Northern combat arc. Creatures that can actually threaten her at current level.",why:""},
+  {n:119,b:2,t:"Friends and Enemies",tags:["npc"],
+   desc:"Northern factions. Not all humans in the North are with the Hand or against it.",why:""},
+  {n:120,b:2,t:"POV Shifts",tags:["lore"],
+   desc:"Extended POV changes begin — other characters across Elos. Claire in Ravenhall. Kyrian elsewhere.",
+   why:"Rhaegar flags these in author notes — around ch.120 the POV shifts are more frequent. It shows the world moving without Ilea at the center. Some readers skip these; don't."},
+  {n:121,b:2,t:"Iana's Work",tags:["npc","lore"],
+   desc:"Iana's teleportation gate research advances. The practical implications start becoming clear.",why:""},
+  {n:122,b:2,t:"Northern Power",tags:["ding","evo"],
+   desc:"Major combat. Northern creatures force class evolution pressure.",why:""},
+  {n:123,b:2,t:"Connections",tags:["npc","lore"],
+   desc:"Threads between Taleen, Azarinth, and the North start visibly connecting.",
+   why:"The three major mysteries of Books 1-2 are not separate. They're parts of the same history."},
+  {n:124,b:2,t:"Deep North",tags:["loc","ding"],
+   desc:"Further north than any Hand member has been. The ruins here are intact.",why:""},
+  {n:125,b:2,t:"Ancient Enemy",tags:["ding","lore"],
+   desc:"Something in the deep North that predates the Taleen. A different category of threat.",
+   why:"The Ascended. They attacked the world thousands of years ago and the combined efforts of every civilization barely stopped them. They're referenced here."},
+  {n:126,b:2,t:"Limits",tags:["ding"],
+   desc:"She hits another hard ceiling. Different from the Centurion — this one is about raw power category.",why:""},
+  {n:127,b:2,t:"Return South",tags:["loc"],
+   desc:"Heading back toward Ravenhall. The North has changed her understanding of the world.",why:""},
+  {n:128,b:2,t:"Information",tags:["lore","npc"],
+   desc:"Intelligence gathered in the North shared with Hand leadership. Claire processes implications.",why:""},
+  {n:129,b:2,t:"Training — New Level",tags:["ding"],
+   desc:"Training resumes at a higher baseline. What challenging means has shifted.",why:""},
+  {n:130,b:2,t:"Goliath",tags:["npc"],
+   desc:"Goliath introduced — Hand member, significant fighter, different approach to power than Ilea.",why:""},
+  {n:131,b:2,t:"Cless",tags:["npc"],
+   desc:"Cless introduced — unusual character, unusual relationship with combat.",why:""},
+  {n:132,b:2,t:"Magic",tags:["ding","evo"],
+   desc:"Azarinth magic evolves in a direction that surprises even her.",why:""},
+  {n:133,b:2,t:"Trian's Path",tags:["npc","lore"],
+   desc:"Trian makes decisions about what to do regarding House Birmingale.",
+   why:"The revenge arc that drives Book 3 gets its foundation here."},
+  {n:134,b:2,t:"Eve's Past",tags:["npc","lore"],
+   desc:"Eve's hatred of nobles gets context. What happened wasn't small.",
+   why:"Eve has been one of the most competent members of Team 34 the entire time. Learning why she hates nobles reframes everything she's said to Trian."},
+  {n:135,b:2,t:"Claire's Ravenhall",tags:["npc","lore"],
+   desc:"Claire's project for Ravenhall — what she's actually building — becomes visible.",
+   why:"Claire is constructing institutional power. Not for herself — for the city. She's been doing this quietly since ch.14."},
+  {n:136,b:2,t:"Dungeon — Deep Run",tags:["ding","loc"],
+   desc:"Major dungeon run. Taleen structures at deeper levels than previously accessed.",why:""},
+  {n:137,b:2,t:"System",tags:["lore"],
+   desc:"Questions about the system itself — who built it, why it exists, what it's optimizing for.",
+   why:"The system isn't natural. Someone or something designed it. This thread runs through the entire series."},
+  {n:138,b:2,t:"Growth — Team",tags:["ding","npc"],
+   desc:"Team 34 final arc of Book 2. Everyone has grown significantly from their Book 1 selves.",why:""},
+  {n:139,b:2,t:"Niivalyr",tags:["npc","lore"],
+   desc:"Niivalyr (Elfie) introduced — an elf who interacts with Ilea differently than the hostile ones.",
+   why:"Elfie is important. The fact that a non-hostile elf exists and chooses to interact with her tells you something about what the elf-human conflict actually is."},
+  {n:140,b:2,t:"Preparation",tags:["npc"],
+   desc:"Preparations for something larger. Team and Hand aligning.",why:""},
+  {n:141,b:2,t:"New Mission",tags:["loc","npc"],
+   desc:"Major mission outside the usual Hand operational zone.",why:""},
+  {n:142,b:2,t:"Combat Arc",tags:["ding"],desc:"Extended combat arc. Major enemy encounter.",why:""},
+  {n:143,b:2,t:"Consequences",tags:["lore","npc"],
+   desc:"What the mission revealed changes plans.",why:""},
+  {n:144,b:2,t:"Power Ceiling",tags:["ding","evo"],
+   desc:"Another evolution threshold. The gap between her and normal adventurers widens.",why:""},
+  {n:145,b:2,t:"Reunion",tags:["npc"],
+   desc:"Characters who diverged earlier in the book come back together.",why:""},
+  {n:146,b:2,t:"Ravenhall — Changes",tags:["loc","lore"],
+   desc:"Ravenhall has changed. Claire's project is visible now.",why:""},
+  {n:147,b:2,t:"Old Threads",tags:["lore"],
+   desc:"Lore threads from Book 1 get picked up with new context.",why:""},
+  {n:148,b:2,t:"Preparation — Finale",tags:["npc"],desc:"Final setup for the Book 2 conclusion.",why:""},
+  {n:149,b:2,t:"The Mission",tags:["ding","lore","npc"],desc:"High-stakes operation.",why:""},
+  {n:150,b:2,t:"Cost",tags:["npc","lore"],
+   desc:"The mission has consequences. Not everything survives intact.",
+   why:"Book 2 ends with more weight than Book 1. People change, structures shift, and the world Ilea returns to is different from the one she left."},
+  {n:151,b:2,t:"Book 2 Finale",tags:["ding","lore","npc","evo"],
+   desc:"End of Book 2. Trian's revenge arc foundation locked in. Book 3 begins immediately.",
+   why:"The Redleaf connection surfaces. The darker arc of Book 3 (ch.150-200) is set up here. Rhaegar warns it goes dark — it does. It comes back."},
+
+  // ── BOOK 3 stub ──
+  {n:152,b:3,t:"Book 3 Begins",tags:["lore"],
+   desc:"Book 3 opens. Revenge arc begins. Darker tone — Rhaegar warns about this in author notes.",
+   why:"The author explicitly flags: ch.150-200 is darker than the rest. It returns to the series' tone afterward. Stay with it."},
+  {n:200,b:3,t:"Book 3 — Midpoint",tags:["evo","lore"],
+   desc:"Major power threshold. The series' tone lightens back toward the familiar after the dark arc.",why:""},
+  {n:323,b:3,t:"Book 3 Finale",tags:["ding","evo","lore"],
+   desc:"End of Book 3. Major evolution. Ilea's place in Elos changes fundamentally.",why:""},
+
+  // ── BOOK 4 stub ──
+  {n:324,b:4,t:"Book 4 Begins",tags:["lore","npc"],desc:"Book 4 opens new arcs and deepens the world's lore.",why:""},
+  {n:439,b:4,t:"Book 4 Finale",tags:["ding","evo","lore"],desc:"End of Book 4.",why:""},
+];
+
+// ═══════════════════════════════════════
+// RESISTANCES
+// ═══════════════════════════════════════
+const RESISTS = [
+  {n:"Poison",ch:3},{n:"Heat",ch:8},{n:"Pain Tolerance",ch:16},
+  {n:"Mental",ch:22},{n:"Fear",ch:34},{n:"Water Magic",ch:42},
+  {n:"Wind Magic",ch:42},{n:"Lightning Magic",ch:46},{n:"Ice Magic",ch:58},
+  {n:"Crystal Magic",ch:58},{n:"Earth Magic",ch:58},{n:"Arcane Magic",ch:58},
+  {n:"Corrosion",ch:59},{n:"Light Magic",ch:59},{n:"Mist Magic",ch:59},
+  {n:"Curse Magic",ch:60},{n:"Blast",ch:91},{n:"Dark Magic",ch:102},
+  {n:"Mana Drain",ch:82},{n:"Health Drain",ch:82},
+];
+
+// ═══════════════════════════════════════
+// NPCS
+// ═══════════════════════════════════════
+const NPCS = [
+  {name:"Edwin Redleaf",role:"Shadow's Hand · Warrior · Team 34",status:"ally",book:1,ch:"Ch.6",
+   desc:"Noble with encyclopedic class knowledge. Obsessed with skill mechanics. Gives Ilea her best build advice.",
+   why:"Every mechanic Edwin explains becomes a plot point. The body enhancement multiplier (ch.17), the stat routing (ch.43). He's the instruction manual wearing a person."},
+  {name:"Claire Russel",role:"Mage · Team 34 · Ravenhall architect",status:"ally",book:1,ch:"Ch.14",
+   desc:"Educated, driven, relentlessly competent. From a disgraced noble house. Quietly building institutional power in Ravenhall.",
+   why:"Claire's project — what she's building in Ravenhall — becomes one of the most important non-combat threads in the series. She's the one making sure there's something worth defending."},
+  {name:"Kyrian",role:"Warrior · Metal Manipulation · Team 34",status:"ally",book:1,ch:"Ch.14",
+   desc:"Heavy armor, metal-warping class. Methodical. The counterbalance to Ilea's chaos.",
+   why:"Kyrian's growth arc is quiet but real. He starts as the most cautious team member and ends up somewhere else entirely."},
+  {name:"Trian Alymie",role:"Lightning Mage · Noble · Team 34",status:"complex",book:2,ch:"Ch.76",
+   desc:"Wealthy noble from House Alymie in the Empire of Lys. Lightning attacks and black smoke. Has vampyric abilities he keeps hidden. His family is later destroyed by House Birmingale.",
+   why:"Trian is the character who changes the most in Book 2. The Demon Realm strips away the noble exterior. What's underneath is someone who needed a reason to fight for something other than status."},
+  {name:"Eve Aillan",role:"Illusionist · Mental Magic · Team 34",status:"ally",book:2,ch:"Ch.76",
+   desc:"Illusion and mental magic. Hates nobles for reasons not initially revealed. Initially hostile to Trian. Iron mind skill. Almost impossible to detect.",
+   why:"Eve's hatred of nobles isn't spite — something happened. When her past surfaces in Book 2, it reframes every interaction she's had with Trian."},
+  {name:"Alice Forkspear",role:"Lightning Mage · Noble · Corinth Order",status:"ally",book:1,ch:"Ch.46",
+   desc:"Noble of House Forkspear. Lightning magic. Corinth Order affiliated but untouchable due to noble status. Electrocuted Ilea at Ilea's request.",
+   why:"Alice represents a type of person Ilea keeps finding — powerful, unusual, and genuinely interested in Ilea as something other than a threat or a tool."},
+  {name:"Niivalyr (Elfie)",role:"Elf · Non-hostile",status:"neutral",book:2,ch:"Ch.139",
+   desc:"An elf who chooses to interact with Ilea without hostility. Unusual within elf-human relations.",
+   why:"The fact that a non-hostile elf exists and approaches her is the first real crack in the elf-human conflict narrative. Something more complicated is happening."},
+  {name:"Meadow",role:"Ancient Being · North",status:"neutral",book:2,ch:"Ch.115",
+   desc:"Not human, not elf, not Taleen. Something older. Found in the deep North.",
+   why:"Meadow is one of the most important characters in the series. Everything they say is load-bearing information. Don't treat them as background."},
+  {name:"Iana",role:"Enchantress · Teleportation Research",status:"ally",book:2,ch:"Ch.92",
+   desc:"Daughter of Balduur. Brilliant enchantress. Research focus: teleportation gates. Relocated to Ravenhall at Ilea's encouragement.",
+   why:"Teleportation gate research sounds academic. The strategic implications of reliable fast travel in Elos are enormous — for the Hand, for Ravenhall, for everything."},
+  {name:"Taleen Centurion",role:"Ancient Construct · Boss",status:"enemy",book:1,ch:"Ch.38+",
+   desc:"Taleen war construct. Learns Ilea's blink distance and adapts. Cannot be damaged at her Book 1 level.",
+   why:"The Centurion represents a hard ceiling that brute-force grinding can't solve. It's not just a strong enemy — it's evidence that the Taleen built things to outlast civilizations."},
+  {name:"Elder Strand",role:"Shadow's Hand Elder · Traitor",status:"enemy",book:2,ch:"Ch.89+",
+   desc:"One of the five Hand Elders. Orchestrated the demon invasion. Connected to things that shouldn't be possible from inside the Hand.",
+   why:"Strand wasn't running a conquest — he was running a ritual. The invasion was a sacrifice or a test for something larger. His exact goal stays murky."},
+];
+
+// ═══════════════════════════════════════
+// EVOLUTION TIMELINE
+// ═══════════════════════════════════════
+const EVO_AH = [
+  {ch:4,title:"Azarinth Healer — Base Class",big:false,
+   desc:"Unlocked from the Azarinth temple ruins after surviving the Bluemoon Grass elixir change. One of three available Azarinth base classes.",
+   why:"She had no idea what she was getting. The class was functionally extinct before this moment."},
+  {ch:40,title:"Skills Hit 2nd Tier",big:false,
+   desc:"Blink, Destruction, Sphere, Reconstruction, State of Azarinth all reach second tier through Book 1 grinding.",
+   why:"2nd tier skills aren't just stronger — they gain entirely new properties. Blink no longer requires ground contact. Sphere expands range significantly."},
+  {ch:67,title:"Major Class Evolution Threshold",big:true,
+   desc:"🔔 One of her classes hits a major evolution at ch.67. New evolution options appear. The flavor text on each option tells you where she's headed.",
+   why:"This is the best ding sequence in Book 1. The evolution choices are not equal — one of them is clearly right for her build and she knows it."},
+  {ch:81,title:"Book 2 — Skill Evolution Choices",big:false,
+   desc:"New skill options in Book 2. She makes choices that define her Book 2 combat style.",
+   why:"Watch what she turns down as much as what she picks. The rejected options are also meaningful."},
+  {ch:105,title:"Demon Realm — Forced Evolution",big:true,
+   desc:"🔔 Demon Realm pressure forces class evolution faster than normal grinding would. Major power jump.",
+   why:"The Demon Realm functions as an accelerant. The threat level there is categorically different from Elos dungeons."},
+];
+
+const EVO_AW = [
+  {ch:1,title:"Ash Wielder — Base Class",big:false,
+   desc:"Second class. Ash and ember manipulation. Initially 20% body enhancement bonus to all magic.",
+   why:"The dual-class system is what makes her build unique. Ash Wielder's enhancement bonus stacks with Azarinth's own auras."},
+  {ch:40,title:"Ash Wielder Evolves — 100% Enhancement",big:true,
+   desc:"🔔 BIG CHAPTER. Body Enhancement bonus jumps from 20% → 100%. Form of Ember hits 2nd tier. Everything hits harder.",
+   why:"This is the multiplier Edwin described in ch.17 becoming real. The number isn't additive — it's multiplicative with everything else she runs."},
+  {ch:96,title:"Book 2 — Team Evolution Arc",big:false,
+   desc:"Ash Wielder continues evolving in Book 2. Northern conditions push the class in new directions.",why:""},
+  {ch:132,title:"Azarinth Magic — New Direction",big:true,
+   desc:"🔔 The Azarinth magic component evolves in a direction that surprises even her. The connection between healing and destruction deepens.",
+   why:"The deeper into the series, the less clear the line between healing and destruction becomes in her kit. That's intentional."},
+];
+
+// ═══════════════════════════════════════
+// LORE THREADS
+// ═══════════════════════════════════════
+const LORE_THREADS = [
+  {icon:"⚙",title:"The Taleen",status:"partial",
+   known:"Ancient dwarven civilization. Built automated war constructs that still follow original orders 3000+ years later. Their dungeons are actually facilities — manufacturing, military, research. The constructs are not malfunctioning. They're working exactly as designed.",
+   unknown:"Why did the Taleen fall? What were they at war with that required this level of automation? The deep North ruins are larger and older than anything seen in Book 1 dungeons. Something happened to them that wasn't natural decline."},
+  {icon:"⚔",title:"The Azarinth Order",status:"partial",
+   known:"Ancient healing order wiped out by Vor Elenthir, a being of enormous power, who feared what their arcane magic could evolve into. The class was functionally extinct until Ilea. They were arrogant and self-righteous — even Ilea's impression of them from their own diaries is 'kind of awful.' The Bluemoon Grass elixir killed one in three initiates.",
+   unknown:"What were they actually evolving toward that scared Vor Elenthir? The class evolution ceiling — the Azarinth Myth — implies they were on a path toward something divine-adjacent. Who else knew about them? Why is the temple Ilea found intact when everything else was destroyed?"},
+  {icon:"🌲",title:"The Elves",status:"open",
+   known:"Elos elves are nothing like fantasy conventions. Older, stranger, and actively hostile to humans in most interactions. They've been attacking human settlements. The elf-human conflict has roots far deeper than current politics.",
+   unknown:"Why are they attacking? It's not conquest — they haven't moved to occupy. Something humans did, or something humans have, or something humans are doing is the trigger. Niivalyr's willingness to interact with Ilea non-hostilely is the first exception to a consistent pattern."},
+  {icon:"❄",title:"The North",status:"open",
+   known:"The North is where the densest Taleen infrastructure exists. Something is active there that isn't just automated constructs. The Hand has limited operational reach. Creatures in the North are categorically stronger than the south.",
+   unknown:"What is still running things up there? The Ascended attacked the world thousands of years ago and were repelled by combined civilizational effort. The North is where the heaviest fighting happened. Something from that war may still be present."},
+  {icon:"🤝",title:"The Shadow's Hand",status:"partial",
+   known:"The Hand is ancient — potentially contemporary with the Azarinth Order (~3000 years). The name Eregar's Haven appears in ancient diaries alongside references to 'Eregar's mercenaries.' Five Elders govern. Elder Strand betrayed the Hand's core value of independence by causing the demon invasion. Elder Urn was assassinated for complicity.",
+   unknown:"What does the Hand's age mean for its actual purpose? An organization that old surviving intact isn't coincidence. Someone or something has been maintaining it. Claire's growing influence within Ravenhall is starting to reshape what the Hand is."},
+  {icon:"⚡",title:"The System",status:"open",
+   known:"The class and leveling system is not natural — it was designed. It tracks, rewards, and occasionally comments on behavior through flavor text. The flavor text on evolution options contains genuine information about who Ilea is becoming.",
+   unknown:"Who built it? What is it optimizing for? Why does it exist in Elos and not Earth? The system's behavior toward Ilea — offering her lost classes, flagging her achievements — suggests it recognizes her differently than it recognizes other people."},
+  {icon:"👁",title:"Vor Elenthir & the Ascended",status:"open",
+   known:"Vor Elenthir is an ancient being of enormous power who was one of the hunters that destroyed the Azarinth Order. He recognized Ilea as Azarinth when they met and did not attack her. The Ascended attacked the world thousands of years ago.",
+   unknown:"Why didn't he attack her? He destroyed the entire Order because he feared what they could become. Ilea is becoming that and more. His restraint is not explained. The Ascended connection — whether Vor Elenthir is Ascended, related, or something else — is deliberately unclear."},
+];
+
+// ═══════════════════════════════════════
+// WORLD REGIONS
+// ═══════════════════════════════════════
+const REGIONS = [
+  {icon:"🌲",name:"Taleen Forest / Azarinth Ruins",books:[1],status:"v",
+   desc:"Where Ilea spawned. Ancient forest surrounding a crumbling Azarinth temple. Healing fountain, library, the start of everything. The last intact Azarinth facility on Elos."},
+  {icon:"🏙",name:"Ravenhall",books:[1,2],status:"v",
+   desc:"Major human city. Shadow's Hand HQ. Ilea's home base. Claire is quietly reshaping it from the inside. The city has history it hasn't told Ilea yet."},
+  {icon:"⚙",name:"Taleen Dungeon Network",books:[1,2],status:"v",
+   desc:"Multiple connected Taleen facilities. Teleportation rooms, turrets, Guardians, Centurions, Praetorians. The deeper you go the older and stranger it gets."},
+  {icon:"❄",name:"The North",books:[2],status:"v",
+   desc:"Cold, dangerous, dense with ancient Taleen infrastructure. Creatures are in a higher power category than the south. Something is still actively running things up there."},
+  {icon:"🏛",name:"Virilya — Empire of Lys Capital",books:[2,3],status:"c",
+   desc:"Trian's home. House Alymie's seat. House Birmingale destroyed them here. The revenge arc heads in this direction."},
+  {icon:"😈",name:"The Demon Realm",books:[2],status:"v",
+   desc:"Cut off from Elos. Different physics, different rules, different threat tier. Ilea and Trian were stranded here. They came back different."},
+  {icon:"🌊",name:"Baralia",books:[3],status:"l",
+   desc:"Region where the Order of Truth had significant influence. War with the Empire of Lys. Blood ritual events. Very dark."},
+  {icon:"🏔",name:"Deep North — Ancient Sites",books:[2,3],status:"c",
+   desc:"Further north than any Hand operation has gone. Taleen ruins at a scale that dwarfs Book 1 dungeons. Meadow is here."},
+];
+
+// ═══════════════════════════════════════
+// EASTER EGGS
+// ═══════════════════════════════════════
+const EGGS = [
+  {t:"The System Recognizes Her Differently",d:"The system offers Ilea class options that shouldn't exist — lost, extinct classes. Its flavor text on her evolution options is more detailed and personal than what other characters receive. It's tracking something about her specifically."},
+  {t:"The Hand's Age = The Order's Age",d:"An ancient diary references 'Eregar's mercenaries' as a contemporary of the Azarinth Order (~3000 years ago). The Shadow's Hand is not a medieval guild. It's an institution as old as the things Ilea is investigating. Whether that's coincidence is left open."},
+  {t:"Trian's Vampyrism Was Always There",d:"Trian's blood/vampyric abilities are hinted at in small ways before ch.88. His unusual endurance, his interest in Ilea's regeneration, his reaction to damage. Rhaegar seeds it before the reveal."},
+  {t:"Eve's Iron Mind = Survival Tool",d:"Eve's Iron Mind skill — which makes her nearly immune to mental intrusion — is not a combat optimization. It's a survival mechanism built from whatever happened to her before the story started. The skill's existence tells you something happened that required it."},
+  {t:"Claire Never Fights",d:"Claire is a mage and a trained Shadow's Hand member, but Rhaegar almost never puts her in direct combat. Her power is institutional — she fights through position, information, and infrastructure. She's the most powerful non-combat character in the series."},
+  {t:"The Healing Fountain's Real Purpose",d:"The Azarinth healing fountain in ch.3 wasn't built for injured adventurers. It was built to stabilize initiates going through the Bluemoon Grass elixir change — the process that killed one in three. Ilea used it without knowing this. It probably saved her life."},
+  {t:"Resistance Farming = Skyrim's Skill System",d:"Every resistance levels by taking that damage type. Higher resistance = less damage. She maximizes this by deliberately seeking out the source. It's identical to Skyrim's armor and block leveling — take more hits to level faster. She knows this. She leans into it."},
+];
+
+// ═══════════════════════════════════════
+// RENDER FUNCTIONS
+// ═══════════════════════════════════════
+
+function renderResistances(){
+  const g=document.getElementById('res-grid');
+  g.innerHTML=RESISTS.map(r=>{
+    const on=r.ch<=currentCh;
+    const isNew=on&&r.ch>=currentCh-2;
+    return `<div class="res-chip ${on?'on':''} ${isNew?'new':''}">
+      <div class="rdot"></div>
+      <span class="rname">${r.n}</span>
+      <span class="rch">ch.${r.ch}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderChLog(){
+  const bookChs=CHAPTERS.filter(c=>c.b===currentBook);
+  document.getElementById('ch-log-list').innerHTML=bookChs.map(c=>{
+    const state=c.n<currentCh?'past':c.n===currentCh?'cur':'fut';
+    const tags=c.tags.map(t=>`<span class="ctag ${t}">${t==='ding'?'🔔':t==='npc'?'👤':t==='loc'?'📍':t==='lore'?'📖':'⚡'} ${t.toUpperCase()}</span>`).join('');
+    return `<div class="ch-item ${state}" onclick="this.classList.toggle('open')">
+      <div class="ch-item-hd">
+        <span class="ch-n">${c.n}</span>
+        <span class="ch-t">${c.t}</span>
+        <div class="ch-tags">${tags}</div>
+      </div>
+      <div class="ch-body">
+        <div class="ch-desc">${state==='fut'?'[ Ahead — spoiler-free ]':c.desc}</div>
+        ${c.why&&state!=='fut'?`<div class="why-block"><div class="why-lbl">👁 WHY IT MATTERS</div><div class="why-text">${c.why}</div></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderNPCs(){
+  document.getElementById('npc-list').innerHTML=NPCS.map(n=>`
+    <div class="npc-card ${n.status}">
+      <div class="npc-top">
+        <span class="npc-name">${n.name}</span>
+        <span class="npc-badge">${n.status.toUpperCase()}</span>
+      </div>
+      <div class="npc-role">${n.role} · First: ${n.ch}</div>
+      <div class="npc-desc">${n.desc}</div>
+      <div class="npc-why">${n.why}</div>
+      <div class="npc-book">BOOK ${n.book}</div>
+    </div>`).join('');
+}
+
+function renderEvo(){
+  const render=(list,id)=>{
+    document.getElementById(id).innerHTML=list.map(e=>{
+      const reached=e.ch<=currentCh;
+      return `<div class="evo-node ${reached?'reached':''} ${e.big?'big':''}">
+        <div class="evo-ch">Ch.${e.ch}</div>
+        <div class="evo-title">${e.title}</div>
+        <div class="evo-desc">${e.desc}</div>
+        ${e.why?`<div class="evo-why">${e.why}</div>`:''}
+      </div>`;
+    }).join('');
+  };
+  render(EVO_AH,'evo-ah');
+  render(EVO_AW,'evo-aw');
+}
+
+function renderLore(){
+  document.getElementById('lore-list').innerHTML=LORE_THREADS.map(l=>`
+    <div class="lore-card" onclick="this.classList.toggle('open-body')">
+      <div class="lore-hd">
+        <span class="lore-icon">${l.icon}</span>
+        <span class="lore-title">${l.title}</span>
+        <span class="lore-status ${l.status}">${l.status==='open'?'OPEN MYSTERY':l.status==='partial'?'PARTIAL':'KNOWN'}</span>
+      </div>
+      <div class="lore-body">
+        <div class="lore-known">
+          <div class="lore-known-lbl">✓ WHAT YOU KNOW</div>
+          <div class="lore-text">${l.known}</div>
+        </div>
+        <div class="lore-unknown">
+          <div class="lore-unknown-lbl">? STILL OPEN</div>
+          <div class="lore-text">${l.unknown}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function renderMap(){
+  document.getElementById('map-list').innerHTML=REGIONS.map(r=>{
+    const visited=r.status==='v';
+    const coming=r.status==='c';
+    return `<div class="map-region">
+      <div class="map-icon">${r.icon}</div>
+      <div class="map-info">
+        <div class="map-name">${r.name} <span style="font-family:'Cinzel',serif;font-size:7px;color:var(--text-dim);">BOOK ${r.books.join('/')}</span></div>
+        <div class="map-desc">${r.desc}</div>
+      </div>
+      <div class="map-status ${r.status}">${visited?'VISITED':coming?'COMING':'???'}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderEggs(){
+  document.getElementById('egg-list').innerHTML=EGGS.map(e=>`
+    <div style="padding:8px 0;border-bottom:1px solid var(--border);">
+      <div style="font-family:'Cinzel',serif;font-size:10px;color:var(--azure);margin-bottom:3px;">${e.t}</div>
+      <div style="font-size:12px;color:var(--text-dim);font-style:italic;line-height:1.5;">${e.d}</div>
+    </div>`).join('');
+}
+
+function updateStats(){
+  const ch=currentCh;
+  const vit=Math.round(80+ch*9+(ch>74?ch*3:0));
+  const int_=Math.round(60+ch*7+(ch>74?ch*2:0));
+  const str=Math.round(40+ch*3);
+  const dex=Math.round(50+ch*4);
+  const end_=Math.round(30+ch*2);
+  const wis=Math.round(40+ch*3);
+  document.getElementById('sv').textContent='~'+vit;
+  document.getElementById('si').textContent='~'+int_;
+  document.getElementById('ss').textContent='~'+str;
+  document.getElementById('sd').textContent='~'+dex;
+  document.getElementById('se').textContent='~'+end_;
+  document.getElementById('sw').textContent='~'+wis;
+  const ahLv=Math.min(300,Math.round(ch*2.2+40));
+  const awLv=Math.min(220,Math.round(ch*1.6+30));
+  document.getElementById('lv-ah').textContent='~'+ahLv;
+  document.getElementById('lv-aw').textContent='~'+awLv;
+  document.getElementById('bar-ah').style.width=Math.min(98,ahLv/3)+'%';
+  document.getElementById('bar-aw').style.width=Math.min(98,awLv/2.2)+'%';
+}
+
+function renderAll(){
+  renderResistances();
+  renderChLog();
+  renderNPCs();
+  renderEvo();
+  renderLore();
+  renderMap();
+  renderEggs();
+  updateStats();
+}
+
+// ═══════════════════════════════════════
+// BOOK SWITCHING
+// ═══════════════════════════════════════
+function setBook(b){
+  currentBook=b;
+  const bk=BOOKS[b];
+  const color=bk.color;
+  document.documentElement.style.setProperty('--book-color',color);
+  document.getElementById('topbar').style.setProperty('--book-color',color);
+  document.querySelectorAll('.bk-btn').forEach((el,i)=>el.classList.toggle('active',i+1===b));
+  const slider=document.getElementById('chSlider');
+  slider.min=bk.start;
+  slider.max=bk.end;
+  // snap to start of book if currentCh is out of range
+  if(currentCh<bk.start||currentCh>bk.end) currentCh=bk.start;
+  slider.value=currentCh;
+  document.getElementById('chNum').textContent=currentCh;
+  updateChName();
+  renderResistances();
+  renderChLog();
+  renderEvo();
+  updateStats();
+}
+
+function updateChName(){
+  const ch=CHAPTERS.find(c=>c.n===currentCh);
+  document.getElementById('chNameBar').textContent=ch?`"${ch.t}"`:` Chapter ${currentCh}`;
+}
+
+// ═══════════════════════════════════════
+// SLIDER
+// ═══════════════════════════════════════
+document.getElementById('chSlider').addEventListener('input',function(){
+  const v=parseInt(this.value);
+  const prev=currentCh;
+  currentCh=v;
+  document.getElementById('chNum').textContent=v;
+  updateChName();
+  const ch=CHAPTERS.find(c=>c.n===v);
+  if(v>prev&&ch&&ch.tags.includes('ding')) showToast('🔔 DING — '+ch.t);
+  if(v>prev&&ch&&ch.tags.includes('evo')) showToast('⚡ EVOLUTION — '+ch.t);
+  renderResistances();
+  updateStats();
+  renderChLog();
+  renderEvo();
+});
+
+// ═══════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════
+function showTab(name){
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('pane-'+name).classList.add('active');
+  event.target.classList.add('active');
+}
+function tog(hd){hd.closest('.sec').classList.toggle('closed');}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+function saveNotes(){
+  try{
+    localStorage.setItem('azarinth-master-notes',document.getElementById('user-notes').value);
+    document.getElementById('save-msg').textContent='Saved.';
+    setTimeout(()=>document.getElementById('save-msg').textContent='',2000);
+  }catch(e){document.getElementById('save-msg').textContent='Storage unavailable.';}
+}
+try{const s=localStorage.getItem('azarinth-master-notes');if(s)document.getElementById('user-notes').value=s;}catch(e){}
+
+// INIT
+setBook(1);
+document.getElementById('chSlider').value=44;
+currentCh=44;
+document.getElementById('chNum').textContent=44;
+updateChName();
+renderAll();
+</script>
+</body>
+</html>
